@@ -1,0 +1,11 @@
+node_modules
+.vscode
+.env
+dist
+prisma/migrations
+/src/generated/prisma
+test.json
+__pycache__
+venv
+/src/generated/prisma
+generated
