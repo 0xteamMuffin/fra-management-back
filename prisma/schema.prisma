@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "./generated/prisma"
@@ -12,4 +6,177 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  VillagePerson
+  GramSabha
+  SubDivisionalCommittee
+  DistrictCommittee
+}
+
+enum FRAType {
+  IFR
+  CR
+  CFR
+}
+
+enum ClaimStatus {
+  Pending
+  Verified
+  Granted
+  Rejected
+}
+
+enum AssetType {
+  AgriculturalLand
+  ForestCover
+  WaterBody
+  Homestead
+  Infrastructure
+}
+
+enum SchemeStatus {
+  Eligible
+  Applied
+  Approved
+  Rejected
+}
+
+model State {
+  id        String     @id @default(uuid())
+  name      String
+  code      String     @unique
+  districts District[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model District {
+  id        String    @id @default(uuid())
+  name      String
+  code      String?
+  state     State     @relation(fields: [stateId], references: [id])
+  stateId   String
+  boundary  Json      
+  villages  Village[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Village {
+  id        String     @id @default(uuid())
+  name      String
+  district  District   @relation(fields: [districtId], references: [id])
+  districtId String
+  coordinates Json     
+  boundary   Json?
+  fraClaims  FRAClaim[]
+  assets     AssetMap[]
+  users      AppUser[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model FRAClaim {
+  id             String       @id @default(uuid())
+  type           FRAType
+  claimantName   String
+  claimantAadhaar String?
+  status         ClaimStatus   @default(Pending)
+  s3FileLinks    Json?         
+  geoBoundary    Json?         
+  village        Village      @relation(fields: [villageId], references: [id])
+  villageId      String
+  verifiedByUser AppUser?     @relation("VerifiedClaims", fields: [verifiedByUserId], references: [id])
+  verifiedByUserId String?
+  approvedByUser AppUser?     @relation("ApprovedClaims", fields: [approvedByUserId], references: [id])
+  approvedByUserId String?
+  grantedAt      DateTime?
+  schemes        SchemeAssignment[]
+  legacyDocs     LegacyDocument[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model LegacyDocument {
+  id         String   @id @default(uuid())
+  source     String
+  s3FileLink String   
+  extracted  Boolean  @default(false)
+  fraClaim   FRAClaim? @relation(fields: [fraClaimId], references: [id])
+  fraClaimId String?
+  metadata   Json?     
+  createdAt  DateTime @default(now())
+}
+
+model AssetMap {
+  id         String   @id @default(uuid())
+  village    Village  @relation(fields: [villageId], references: [id])
+  villageId  String
+  type       AssetType
+  description Json?    
+  geoBoundary Json
+  detectedAt DateTime @default(now())
+}
+
+model Scheme {
+  id          String             @id @default(uuid())
+  name        String
+  ministry    String?
+  description Json?               
+  eligibility Json?               
+  claims      SchemeAssignment[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SchemeAssignment {
+  id          String      @id @default(uuid())
+  fraClaim    FRAClaim    @relation(fields: [fraClaimId], references: [id])
+  fraClaimId  String
+  scheme      Scheme      @relation(fields: [schemeId], references: [id])
+  schemeId    String
+  status      SchemeStatus @default(Eligible)
+  assignedAt  DateTime    @default(now())
+}
+
+model AppUser {
+  id           String      @id @default(uuid())
+  name         String
+  email        String      @unique
+  passwordHash String
+  role         UserRole    @default(VillagePerson)
+  phone        String?
+  village      Village?    @relation(fields: [villageId], references: [id])
+  villageId    String?
+  verifiedClaims FRAClaim[] @relation("VerifiedClaims")
+  approvedClaims FRAClaim[] @relation("ApprovedClaims")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description Json?    
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  id           String    @id @default(uuid())
+  role         UserRole
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId String
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  user      AppUser? @relation(fields: [userId], references: [id])
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  timestamp DateTime @default(now())
+  details   Json?    
 }
