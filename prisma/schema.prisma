@@ -1,10 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
 }
 
 enum UserRole {
@@ -57,7 +59,7 @@ model District {
   code      String?
   state     State     @relation(fields: [stateId], references: [id])
   stateId   String
-  boundary  Json
+  boundary  Unsupported("geometry")
   villages  Village[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -68,8 +70,8 @@ model Village {
   name        String
   district    District   @relation(fields: [districtId], references: [id])
   districtId  String
-  coordinates Json
-  boundary    Json?
+  coordinates Unsupported("geometry")
+  boundary    Unsupported("geometry")?
   fraClaims   FRAClaim[]
   assets      AssetMap[]
   users       AppUser[]
@@ -84,7 +86,7 @@ model FRAClaim {
   claimantAadhaar  String?
   status           ClaimStatus        @default(Pending)
   s3FileLinks      Json?
-  geoBoundary      Json?
+  geoBoundary      Unsupported("geometry")?
   village          Village            @relation(fields: [villageId], references: [id])
   villageId        String
   verifiedByUser   AppUser?           @relation("VerifiedClaims", fields: [verifiedByUserId], references: [id])
@@ -115,7 +117,7 @@ model AssetMap {
   villageId   String
   type        AssetType
   description Json?
-  geoBoundary Json
+  geoBoundary Unsupported("geometry")
   detectedAt  DateTime  @default(now())
 }
 
