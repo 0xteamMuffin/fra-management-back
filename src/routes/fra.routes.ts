@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticateJWT, authorizeRoles } from "../middleware/auth.middleware";
-import { Request, Response } from "express";
+import { approveClaim, verifyClaim } from "../handler/fra.handler";
 
 const router = Router();
 
@@ -9,9 +9,7 @@ router.post(
   "/verify/:id",
   authenticateJWT,
   authorizeRoles(["GramSabha", "SubDivisionalCommittee", "DistrictCommittee"]),
-  (req: Request, res: Response) => {
-    return res.json({ message: "Claim verified" });
-  }
+  verifyClaim
 );
 
 // only District Committee can approve final claims
@@ -19,9 +17,7 @@ router.post(
   "/approve/:id",
   authenticateJWT,
   authorizeRoles(["DistrictCommittee"]),
-  (req: Request, res: Response) => {
-    return res.json({ message: "Claim approved" });
-  }
+  approveClaim
 );
 
 export { router as fraRoutes };

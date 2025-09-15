@@ -4,6 +4,7 @@ import { fraRoutes } from "./routes/fra.routes";
 import { stateRoutes } from "./routes/state.routes";
 import { districtRoutes } from "./routes/district.routes";
 import { villageRoutes } from "./routes/village.routes";
+import { fraClaimRoutes } from "./routes/fra-claim.routes";
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.use(
     .use("/states", stateRoutes)
     .use("/districts", districtRoutes)
     .use("/villages", villageRoutes)
+    .use("/claims", fraClaimRoutes)
 );
 
 export { router as apiRouter };
