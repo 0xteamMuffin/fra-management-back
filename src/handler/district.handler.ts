@@ -46,14 +46,17 @@ export const updateDistrict = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, code, stateId, boundary } = req.body;
 
-    let updateData: Prisma.DistrictUpdateInput = { name, code, stateId };
-    
+    let updateData: Prisma.DistrictUpdateInput = { name, code };
+    if (stateId) {
+      updateData.state = { connect: { id: stateId } };
+    }
+
     if (boundary) {
       // Use raw query for updates involving geometry
       const updatedDistrict = await db.$queryRaw`
         UPDATE "District"
         SET name = ${name}, code = ${code}, "stateId" = ${stateId}, boundary = ST_GeomFromGeoJSON(${boundary}), "updatedAt" = NOW()
-        WHERE id = ${id}
+        WHERE id = ${id}::uuid
         RETURNING *;
       `;
       return res.status(200).json(updatedDistrict);
