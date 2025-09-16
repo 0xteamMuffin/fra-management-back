@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { authRoutes } from "./routes/auth.routes";
 import { fraRoutes } from "./routes/fra.routes";
+import { segmentationRoutes } from "./routes/ocr.routes";
 
 dotenv.config();
 
@@ -13,8 +14,9 @@ app.use(cors());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/fra", fraRoutes);
+app.use("/api/v1/analysis", segmentationRoutes);
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
