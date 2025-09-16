@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+pydantic
+spacy
 opencv-python-headless
-python-multipart
-numpy
+python-dotenv
