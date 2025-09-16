@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --build",
     "start": "node ./dist/index.js",
-    "start:dev": "nodemon ./src/index.ts"
+    "start:dev": "npx prisma generate && npx prisma db push --accept-data-loss && nodemon --ignore venv/ --ignore node_modules/ ./src/index.ts"
   },
   "keywords": [],
   "author": "",
