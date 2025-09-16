@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   db:
     image: postgis/postgis:16-3.5
@@ -8,9 +8,32 @@ services:
       POSTGRES_PASSWORD: diwisen_password
       POSTGRES_DB: diwisen_db
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  node-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    ports:
+      - "3000:3000"
+      - "5555:5555"
+    command: npm run start:dev
+    depends_on:
+      - db
+      - land-segmentation-api
+    env_file:
+      - .env
+    restart: always
+
+  land-segmentation-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    ports:
+      - "8000:8000"
+    restart: always
 
 volumes:
   postgres_data:
