@@ -6,6 +6,7 @@ import { districtRoutes } from "./routes/district.routes";
 import { villageRoutes } from "./routes/village.routes";
 import { fraClaimRoutes } from "./routes/fra-claim.routes";
 import { s3Routes } from "./routes/s3.routes";
+import { documentRoutes } from "./routes/document.routes";
 import { segmentationRoutes } from "./routes/seg.routes";
 
 const router = Router();
@@ -21,7 +22,8 @@ router.use(
     .use("/villages", villageRoutes)
     .use("/claims", fraClaimRoutes)
     .use("/s3", s3Routes)
-    .use("/segment", segmentationRoutes)
+    .use("/analysis", segmentationRoutes)
+    .use("/documents", documentRoutes)
 );
 
 export { router as apiRouter };
