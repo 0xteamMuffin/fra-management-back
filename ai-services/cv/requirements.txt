@@ -4,3 +4,4 @@ pydantic
 spacy
 opencv-python-headless
 python-dotenv
+python-multipart
