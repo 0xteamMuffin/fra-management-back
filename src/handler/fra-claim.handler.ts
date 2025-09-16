@@ -3,16 +3,40 @@ import db from "../db/db";
 
 export const createFRAClaim = async (req: Request, res: Response) => {
   try {
-    const { type, claimantName, claimantAadhaar, villageId, geoBoundary } =
-      req.body;
+    const { familyMembers, evidence, ...claimData } = req.body;
 
-    const claim = await db.$queryRaw`
-      INSERT INTO "FRAClaim" (id, type, "claimantName", "claimantAadhaar", "villageId", "geoBoundary", "createdAt", "updatedAt")
-      VALUES (gen_random_uuid(), ${type}, ${claimantName}, ${claimantAadhaar}, ${villageId}, ST_GeomFromGeoJSON(${geoBoundary}), NOW(), NOW())
-      RETURNING *;
-    `;
+    const result = await db.$transaction(async (prisma) => {
+      // Step 1: Create the main claim
+      const newClaim = await prisma.fRAClaim.create({
+        data: {
+          ...claimData,
+        },
+      });
 
-    return res.status(201).json(claim);
+      // Step 2: Create the family members, linking them to the new claim
+      if (familyMembers && familyMembers.length > 0) {
+        await prisma.familyMember.createMany({
+          data: familyMembers.map((member: any) => ({
+            ...member,
+            fraClaimId: newClaim.id,
+          })),
+        });
+      }
+
+      // Step 3: Create the evidence records, linking them to the new claim
+      if (evidence && evidence.length > 0) {
+        await prisma.evidence.createMany({
+          data: evidence.map((ev: any) => ({
+            ...ev,
+            fraClaimId: newClaim.id,
+          })),
+        });
+      }
+
+      return newClaim;
+    });
+
+    return res.status(201).json(result);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Failed to create FRA claim" });

@@ -80,28 +80,68 @@ model Village {
 }
 
 model FRAClaim {
-  id               String             @id @default(uuid())
-  type             FRAType
-  claimantName     String
-  claimantAadhaar  String?
-  status           ClaimStatus        @default(Pending)
-  s3FileLinks      Json?
-  geoBoundary      Unsupported("geometry")?
-  village          Village            @relation(fields: [villageId], references: [id])
-  villageId        String
-  verifiedByUser   AppUser?           @relation("VerifiedClaims", fields: [verifiedByUserId], references: [id])
-  verifiedByUserId String?
-  approvedByUser   AppUser?           @relation("ApprovedClaims", fields: [approvedByUserId], references: [id])
-  approvedByUserId String?
-  grantedAt        DateTime?
-  schemes          SchemeAssignment[]
-  legacyDocs       LegacyDocument[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                  String    @id @default(uuid())
+  type                FRAType // Retained for high-level classification
+  claimantName        String
+  spouseName          String?
+  fatherOrMotherName  String?
+  fullResidentialAddress String?
+  villageName         String?
+  gramPanchayat       String?
+  tehsil              String?
+  district            String?
+  claimantCategory    String // "ST" or "OTFD"
+  casteOrTribeCertificateS3Key String?
+
+  // Section 2: Details of the Forest Right Claimed (as JSON for flexibility)
+  claimedRights       Json?
+
+  // Section 4: Additional Information
+  otherRelevantInfo   String?
+  applicantSignatureOrThumbS3Key String?
+
+  // --- Core Claim Details ---
+  status              ClaimStatus @default(Pending)
+  village             Village   @relation(fields: [villageId], references: [id])
+  villageId           String
+
+  // Relationships
+  familyMembers       FamilyMember[]
+  evidence            Evidence[]
+
+  // --- Verification & Approval ---
+  verifiedByUser      AppUser?    @relation("VerifiedClaims", fields: [verifiedByUserId], references: [id])
+  verifiedByUserId    String?
+  approvedByUser      AppUser?    @relation("ApprovedClaims", fields: [approvedByUserId], references: [id])
+  approvedByUserId    String?
+  grantedAt           DateTime?
+  schemes             SchemeAssignment[]
+  legacyDocs          LegacyDocument[]
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model FamilyMember {
+  id              String   @id @default(uuid())
+  name            String
+  age             Int
+  relationship    String
+  fraClaim        FRAClaim @relation(fields: [fraClaimId], references: [id])
+  fraClaimId      String
+  createdAt       DateTime @default(now())
+}
+
+model Evidence {
+  id              String   @id @default(uuid())
+  s3Key           String   // Link to the file in S3
+  category        String   // e.g., "GovernmentRecords", "PhysicalEvidence"
+  fraClaim        FRAClaim @relation(fields: [fraClaimId], references: [id])
+  fraClaimId      String
+  createdAt       DateTime @default(now())
 }
 
 model LegacyDocument {
-  id         String    @id @default(uuid())
+  id         String @id @default(uuid())
   source     String
   s3FileLink String
   extracted  Boolean   @default(false)
