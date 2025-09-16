@@ -7,3 +7,4 @@ test.json
 __pycache__
 venv
 generated
+package-lock.json
