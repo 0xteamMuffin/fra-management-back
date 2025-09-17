@@ -10,13 +10,15 @@ import spacy
 from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from googletrans import Translator
 
 # Load environment variables from .env file
-load_dotenv(dotenv_path="../.env")
+load_dotenv()
 
 # --- Configuration & Initialization ---
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+# translator = Translator()
 
 # Check for required environment variables for AWS
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
@@ -56,10 +58,19 @@ def download_from_s3(s3_key: str) -> bytes:
 def run_tesseract_ocr(image_bytes: bytes) -> str:
     logger.info("Running Tesseract OCR...")
     try:
+        logger.info(f"First 50 bytes: {image_bytes[:50]}")
         image = Image.open(BytesIO(image_bytes))
-        text = pytesseract.image_to_string(image)
+        text = pytesseract.image_to_string(image, lang="ori")
+
+        # try:
+        #     translation = translator.translate(odia_text, src="or", dest="en")
+        #     english_text = translation.text
+        # except Exception as e:
+        #     logger.error(f"Translation failed: {e}")
+        #     english_text = None
         # TODO: Implement confidence checking.
         logger.info("Tesseract OCR completed.")
+        print(text)
         return text
     except Exception as e:
         logger.error(f"Tesseract OCR failed: {e}")

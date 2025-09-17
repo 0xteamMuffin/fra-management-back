@@ -4,6 +4,11 @@ import db from "../db/db";
 // The Python service is discoverable via its service name in docker-compose
 const DOCUMENT_PROCESSING_API_URL = "http://document-processing-api:8001";
 
+// If working without docker
+// const DOCUMENT_PROCESSING_API_URL = "http://0.0.0.0:8001";
+
+
+
 export const processDocument = async (req: Request, res: Response) => {
   try {
     const { s3Key } = req.body;
@@ -24,7 +29,10 @@ export const processDocument = async (req: Request, res: Response) => {
         s3Key,
         processingId: newProcessingJob.id,
         // The callback URL our Node server exposes, using the Docker service name and dynamic port
-        callbackUrl: `http://app:${process.env.PORT || 4000}/api/v1/documents/callback/${newProcessingJob.id}`,
+        // callbackUrl: `http://app:${process.env.PORT || 4000}/api/v1/documents/callback/${newProcessingJob.id}`,
+        
+        // For when running the app backend without docker
+        callbackUrl: `http://localhost:${process.env.PORT || 4000}/api/v1/documents/callback/${newProcessingJob.id}`,
       }),
     }).catch((error) => {
       // If the trigger fails, we log it but don't fail the request,
