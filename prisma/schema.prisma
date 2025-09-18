@@ -132,6 +132,10 @@ model FRAClaim {
   legacyDocs          LegacyDocument[]
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+
+  // Link to the user who created the claim
+  createdByUser    AppUser? @relation("CreatedClaims", fields: [createdByUserId], references: [id])
+  createdByUserId  String?
 }
 
 model FamilyMember {
@@ -221,6 +225,7 @@ model AppUser {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   AuditLog       AuditLog[]
+  createdClaims  FRAClaim[] @relation("CreatedClaims")
 }
 
 model Permission {
