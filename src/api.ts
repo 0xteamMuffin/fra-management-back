@@ -8,6 +8,7 @@ import { fraClaimRoutes } from "./routes/fra-claim.routes";
 import { s3Routes } from "./routes/s3.routes";
 import { documentRoutes } from "./routes/document.routes";
 import { segmentationRoutes } from "./routes/seg.routes";
+import { dssRoutes } from "./routes/dss.routes";
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.use(
     .use("/s3", s3Routes)
     .use("/analysis", segmentationRoutes)
     .use("/documents", documentRoutes)
+    .use("/dss", dssRoutes)
 );
 
 export { router as apiRouter };
