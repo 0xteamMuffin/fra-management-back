@@ -5,6 +5,7 @@ spacy
 opencv-python-headless
 python-dotenv
 requests
+googletrans
 boto3
 google-cloud-vision
 pytesseract
