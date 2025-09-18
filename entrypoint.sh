@@ -15,5 +15,5 @@ if [ ! -f "$FLAG_FILE" ]; then
 fi
 
 # Start the main process
-npm run build
-npm run start
+#npm run build
+npm run dev
