@@ -25,13 +25,13 @@ router.use(
     .use("/fra", fraRoutes)
     .use("/states", stateRoutes)
     .use("/districts", districtRoutes)
+    .use("/sub-district", subDistrictRouter)
     .use("/villages", villageRoutes)
     .use("/claims", fraClaimRoutes)
     .use("/s3", s3Routes)
     .use("/analysis", segmentationRoutes)
     .use("/documents", documentRoutes)
     .use("/admin", adminRoutes)
-    .use("/sub-district", subDistrictRouter)
 );
 
 export { router as apiRouter };
