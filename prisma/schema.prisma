@@ -54,15 +54,26 @@ model State {
 }
 
 model District {
-  id        String    @id @default(uuid())
-  name      String
-  code      String?
-  state     State     @relation(fields: [stateId], references: [id])
-  stateId   String
-  boundary  Unsupported("geometry")
-  villages  Village[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String        @id @default(uuid())
+  name        String
+  code        String?
+  state       State         @relation(fields: [stateId], references: [id])
+  stateId     String
+  boundary    Unsupported("geometry")?
+  subDistricts SubDistrict[]
+  villages    Village[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model SubDistrict {
+  id         String    @id @default(uuid())
+  name       String
+  district   District  @relation(fields: [districtId], references: [id])
+  districtId String
+  villages   Village[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 model Village {
@@ -70,6 +81,8 @@ model Village {
   name        String
   district    District   @relation(fields: [districtId], references: [id])
   districtId  String
+  subDistrict SubDistrict? @relation(fields: [subDistrictId], references: [id])
+  subDistrictId String?
   coordinates Unsupported("geometry")
   boundary    Unsupported("geometry")?
   fraClaims   FRAClaim[]

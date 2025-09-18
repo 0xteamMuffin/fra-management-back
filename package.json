@@ -6,7 +6,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --build",
     "start": "node ./dist/index.js",
-    "dev": "npx prisma generate && npx prisma db push --accept-data-loss && nodemon --ignore venv/ --ignore node_modules/ ./src/index.ts"
+    "dev": "npx prisma generate && npx prisma db push --accept-data-loss && nodemon --ignore venv/ --ignore node_modules/ ./src/index.ts",
+    "create-admin": "ts-node src/scripts/create-admin.ts",
+    "seed": "ts-node src/scripts/create-admin.ts",
+    "import-geojson": "ts-node src/scripts/import-geojson.ts",
+    "import-geojson-simple": "ts-node src/scripts/import-geojson-simple.ts"
   },
   "keywords": [],
   "author": "",
