@@ -11,6 +11,7 @@ import { segmentationRoutes } from "./routes/seg.routes";
 import { adminRoutes } from "./routes/admin.routes";
 import { setupRoutes } from "./routes/setup.routes";
 import subDistrictRouter from "./routes/sub-district.routes";
+import { dssRoutes } from "./routes/dss.routes";
 
 const router = Router();
 
@@ -32,6 +33,7 @@ router.use(
     .use("/analysis", segmentationRoutes)
     .use("/documents", documentRoutes)
     .use("/admin", adminRoutes)
+    .use("/dss", dssRoutes)
 );
 
 export { router as apiRouter };
