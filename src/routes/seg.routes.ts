@@ -3,6 +3,11 @@ import multer from "multer";
 const router = Router();
 const upload = multer();
 
+const LAND_SEGMENTATION_API_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://0.0.0.0:8000"
+    : "http://land-segmentation-api:8000";
+
 router.post(
   "/segment",
   upload.single("file"),
@@ -16,7 +21,7 @@ router.post(
       req.file.originalname
     );
 
-    const response = await fetch("http://land-segmentation-api:8000/segment", {
+    const response = await fetch(`${LAND_SEGMENTATION_API_URL}/segment`, {
       method: "POST",
       body: form,
     });
