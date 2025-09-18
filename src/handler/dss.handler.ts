@@ -8,25 +8,15 @@ const openai = new OpenAI({
 
 export const getDSSSuggestions = async (req: AuthRequest, res: Response) => {
   try {
-    // const userId = req.user?.id;
     const { assetMapping } = req.body;
 
-    // TODO: ignore auth for internals
-    // if (!userId) {
-    //   return res.status(401).json({ message: "Unauthorized" });
-    // }
+    if (!assetMapping) {
+      return res.status(400).json({ message: "assetMapping is required" });
+    }
 
-    // const updatedClaim = await db.fRAClaim.update({
-    //   where: { id },
-    //   data: {
-    //     status: "Verified",
-    //     verifiedByUserId: userId,
-    //   },
-    // });
+    // You can also add more specific validation for assetMapping properties here if needed
 
-    let aiResponse: string | null = null;
-    if (assetMapping) {
-      const prompt = `
+    const prompt = `
 You are an expert Decision Support System (DSS) advisor for rural development 
 and welfare scheme alignment. 
 
@@ -68,27 +58,42 @@ Your tasks:
 }
 `;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a DSS engine combining rule-based logic with reasoning",
-          },
-          { role: "user", content: prompt },
-        ],
-      });
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a DSS engine combining rule-based logic with reasoning. You must respond with only valid JSON.",
+        },
+        { role: "user", content: prompt },
+      ],
+      response_format: { type: "json_object" },
+    });
 
-      aiResponse = completion.choices[0]?.message?.content ?? null;
+    const aiResponse = completion.choices[0]?.message?.content ?? null;
+
+    if (!aiResponse) {
+      return res
+        .status(500)
+        .json({ message: "Failed to get a response from AI service" });
     }
 
-    return res.status(200).json({
-      // claim: updatedClaim,
-      suggestions: aiResponse,
-    });
+    try {
+      const suggestions = JSON.parse(aiResponse);
+      return res.status(200).json({ suggestions });
+    } catch (error) {
+      console.error("Error parsing AI response to JSON:", error);
+      console.error("Raw AI Response:", aiResponse);
+      return res
+        .status(500)
+        .json({ message: "Failed to parse DSS suggestions" });
+    }
   } catch (error) {
-    console.error(error);
+    console.error("Error in getDSSSuggestions:", error);
+    if (error instanceof OpenAI.APIError) {
+      return res.status(error.status || 500).json({ message: `OpenAI Error: ${error.message}` });
+    }
     return res.status(500).json({ message: "Failed to fetch suggestions" });
   }
 };

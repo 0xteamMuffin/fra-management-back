@@ -211,7 +211,7 @@ def segment_image_cv(img: np.ndarray):
     stats = {
         "forest": int(np.count_nonzero(forest_mask) / total_pixels * 100),
         "water": int(np.count_nonzero(water_mask) / total_pixels * 100),
-        "soil": int(np.count_nonzero(soil_mask) / total_pixels * 100),
+        "soil": int(np.count_nonzero(soil_mask) / total_pixels * 100)
         # "buildings": int(np.count_nonzero(mask_building) / total_pixels * 100),
     }
 
