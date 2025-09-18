@@ -112,9 +112,11 @@ model FRAClaim {
   // Section 4: Additional Information
   otherRelevantInfo   String?
   applicantSignatureOrThumbS3Key String?
+  remarks             String?
 
   // --- Core Claim Details ---
   status              ClaimStatus @default(Pending)
+  currentStage        UserRole    @default(GramSabha)
   village             Village   @relation(fields: [villageId], references: [id])
   villageId           String
 

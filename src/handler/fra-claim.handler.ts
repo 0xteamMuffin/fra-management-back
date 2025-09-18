@@ -57,21 +57,23 @@ export const getFRAClaims = async (req: AuthRequest, res: Response) => {
 
     let whereClause: any = {};
 
-    // Tailor the query based on user role
-    switch (user.role) {
-      case 'VillagePerson':
-        whereClause.createdByUserId = user.id;
-        break;
-      case 'GramSabha':
-        whereClause.status = 'Pending';
-        break;
-      case 'SubDivisionalCommittee':
-      case 'DistrictCommittee':
-        whereClause.status = 'Verified';
-        break;
-      default:
-        return res.status(403).json({ message: "Forbidden: User role cannot view claims" });
-    }
+     // Tailor the query based on user role
+     switch (user.role) {
+       case 'VillagePerson':
+         whereClause.createdByUserId = user.id;
+         break;
+       case 'GramSabha':
+         whereClause.currentStage = 'GramSabha';
+         break;
+       case 'SubDivisionalCommittee':
+         whereClause.currentStage = 'SubDivisionalCommittee';
+         break;
+       case 'DistrictCommittee':
+         whereClause.currentStage = 'DistrictCommittee';
+         break;
+       default:
+         return res.status(403).json({ message: "Forbidden: User role cannot view claims" });
+     }
 
     const claims = await db.fRAClaim.findMany({
       where: whereClause,

@@ -1,8 +1,16 @@
 import { Router } from "express";
 import { authenticateJWT, authorizeRoles } from "../middleware/auth.middleware";
-import { approveClaim, verifyClaim, rejectClaim } from "../handler/fra.handler";
+import { approveClaim, verifyClaim, rejectClaim, forwardClaim } from "../handler/fra.handler";
 
 const router = Router();
+
+// Route to move claims through the workflow
+router.post(
+  "/forward/:id",
+  authenticateJWT,
+  authorizeRoles(["GramSabha", "SubDivisionalCommittee"]),
+  forwardClaim
+);
 
 // only GramSabha and higher can verify FRA claims
 router.post(
