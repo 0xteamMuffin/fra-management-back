@@ -3,11 +3,11 @@ import db from "../db/db";
 
 export const createVillage = async (req: Request, res: Response) => {
   try {
-    const { name, districtId, coordinates, boundary } = req.body;
+    const { name, districtId, subDistrictId, coordinates, boundary } = req.body;
 
     const village = await db.$queryRaw`
-      INSERT INTO "Village" (id, name, "districtId", coordinates, boundary, "createdAt", "updatedAt")
-      VALUES (gen_random_uuid(), ${name}, ${districtId}, ST_GeomFromGeoJSON(${coordinates}), ST_GeomFromGeoJSON(${boundary}), NOW(), NOW())
+      INSERT INTO "Village" (id, name, "districtId", "subDistrictId", coordinates, boundary, "createdAt", "updatedAt")
+      VALUES (gen_random_uuid(), ${name}, ${districtId}, ${subDistrictId}, ST_GeomFromGeoJSON(${coordinates}), ST_GeomFromGeoJSON(${boundary}), NOW(), NOW())
       RETURNING *;
     `;
 
@@ -20,6 +20,22 @@ export const createVillage = async (req: Request, res: Response) => {
 
 export const getVillages = async (req: Request, res: Response) => {
   try {
+    const { districtId, search } = req.query;
+
+    if (districtId) {
+      const villages = await db.village.findMany({
+        where: {
+          districtId: districtId as string,
+          ...(search && {
+            name: {
+              contains: search as string,
+              mode: "insensitive",
+            },
+          }),
+        },
+      });
+      return res.status(200).json(villages);
+    }
     const villages = await db.village.findMany();
     return res.status(200).json(villages);
   } catch (error) {
