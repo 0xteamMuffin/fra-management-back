@@ -4,4 +4,9 @@ pydantic
 spacy
 opencv-python-headless
 python-dotenv
-python-multipart
+requests
+boto3
+google-cloud-vision
+pytesseract
+Pillow
+python-magic
