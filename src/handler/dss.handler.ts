@@ -27,38 +27,49 @@ export const getDSSSuggestions = async (req: AuthRequest, res: Response) => {
     let aiResponse: string | null = null;
     if (assetMapping) {
       const prompt = `
-      You are an expert Decision Support System (DSS) specialized in rural development, social welfare, 
-and government scheme alignment. Your role is to analyze FRA (Forest Rights Act) claim holders 
-and recommend matching CSS (Centrally Sponsored Schemes) such as DAJGUA, Jal Shakti, etc., 
-to maximize benefits.
+You are an expert Decision Support System (DSS) advisor for rural development 
+and welfare scheme alignment. 
 
-Here is the information we have:
-        ${JSON.stringify(assetMapping, null, 2)}
+You have asset allocation data from FRA claim holders. 
+Based on this, recommend CSS (Centrally Sponsored Schemes) like DAJGUA, Jal Shakti, MNREGA, PM-KUSUM, etc.
 
+RULES (must strictly follow):
+1. Only recommend **Jal Shakti (e.g., borewell, irrigation)** if water assets are
+   below 20% OR water index is explicitly marked as "Low".
+   - If water % >= 30%, do NOT suggest Jal Shakti interventions.
+2. Recommend **DAJGUA** if land share is >= 20% (land-focused households).
+3. Recommend **MNREGA** for additional income support if land < 15% or no stable asset is present.
+4. Recommend **PM-KUSUM** if significant land is available for solar pumps (>25% land).
+5. Avoid duplicating schemes — only return what is logically justified.
 
-Your tasks are:
-1. Recommend which CSS schemes (like DAJGUA, Jal Shakti, MNREGA, PM-KUSUM, etc.) 
-   this household/village is eligible for, based on FRA status and assets.
-2. Prioritize interventions (e.g., borewell, irrigation, soil fertility programs) 
-   if village has low water index or other vulnerabilities.
-3. Suggest how rule-based logic (eligibility criteria) combines with AI reasoning 
-   for this recommendation.
-4. Return the result as a **structured JSON** with the following format:
+Input asset mapping:
+${JSON.stringify(assetMapping, null, 2)}
+
+Your tasks:
+1. Recommend eligible CSS schemes with clear eligibility reasons.
+2. Suggest prioritized interventions ONLY if there is a genuine need 
+   (based on asset % thresholds).
+3. Return results strictly as formatted JSON:
 
 {
   "schemeRecommendations": [
     { "schemeName": "DAJGUA", "eligibilityReason": "...", "priority": "High/Medium/Low" }
   ],
   "interventions": [
-    { "intervention": "Borewell under Jal Shakti", "reason": "Low water index in region", "urgency": "High" }
+    { "intervention": "X", "reason": "Y", "urgency": "High/Medium/Low" }
   ],
   "additionalNotes": "..."
-}`;
+}
+`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: "You are a financial assistant." },
+          {
+            role: "system",
+            content:
+              "You are a DSS engine combining rule-based logic with reasoning",
+          },
           { role: "user", content: prompt },
         ],
       });
