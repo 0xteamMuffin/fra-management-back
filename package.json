@@ -10,7 +10,7 @@
     "create-admin": "ts-node src/scripts/create-admin.ts",
     "seed": "ts-node src/scripts/create-admin.ts",
     "import-geojson": "ts-node src/scripts/import-geojson.ts",
-    "import-geojson-simple": "ts-node src/scripts/import-geojson-simple.ts"
+    "create-officials": "ts-node src/scripts/create-officials.ts"
   },
   "keywords": [],
   "author": "",

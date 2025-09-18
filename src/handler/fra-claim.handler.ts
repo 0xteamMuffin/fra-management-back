@@ -49,20 +49,36 @@ export const createFRAClaim = async (req: AuthRequest, res: Response) => {
 
 export const getFRAClaims = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const user = req.user;
 
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized: No user ID found" });
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized: No user found" });
+    }
+
+    let whereClause: any = {};
+
+    // Tailor the query based on user role
+    switch (user.role) {
+      case 'VillagePerson':
+        whereClause.createdByUserId = user.id;
+        break;
+      case 'GramSabha':
+        whereClause.status = 'Pending';
+        break;
+      case 'SubDivisionalCommittee':
+      case 'DistrictCommittee':
+        whereClause.status = 'Verified';
+        break;
+      default:
+        return res.status(403).json({ message: "Forbidden: User role cannot view claims" });
     }
 
     const claims = await db.fRAClaim.findMany({
-      where: {
-        createdByUserId: userId, // Only fetch claims for the logged-in user
-      },
+      where: whereClause,
       include: {
-        village: true,       // Include related village data
-        familyMembers: true, // Include related family members
-        evidence: true,      // Include related evidence
+        village: true,
+        familyMembers: true,
+        evidence: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -70,6 +86,7 @@ export const getFRAClaims = async (req: AuthRequest, res: Response) => {
     });
     return res.status(200).json(claims);
   } catch (error) {
+    console.error("Error retrieving claims:", error);
     return res.status(500).json({ message: "Failed to retrieve FRA claims" });
   }
 };
