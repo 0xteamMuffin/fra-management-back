@@ -6,7 +6,6 @@ export const createDistrict = async (req: Request, res: Response) => {
   try {
     const { name, code, stateId, boundary } = req.body;
 
-    // Use raw query to handle GeoJSON conversion
     const district = await db.$queryRaw`
       INSERT INTO "District" (id, name, code, "stateId", boundary, "createdAt", "updatedAt")
       VALUES (gen_random_uuid(), ${name}, ${code}, ${stateId}, ST_GeomFromGeoJSON(${boundary}), NOW(), NOW())
@@ -52,7 +51,6 @@ export const updateDistrict = async (req: Request, res: Response) => {
     }
 
     if (boundary) {
-      // Use raw query for updates involving geometry
       const updatedDistrict = await db.$queryRaw`
         UPDATE "District"
         SET name = ${name}, code = ${code}, "stateId" = ${stateId}, boundary = ST_GeomFromGeoJSON(${boundary}), "updatedAt" = NOW()
@@ -72,7 +70,6 @@ export const updateDistrict = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Failed to update district" });
   }
 };
-
 
 export const deleteDistrict = async (req: Request, res: Response) => {
   try {

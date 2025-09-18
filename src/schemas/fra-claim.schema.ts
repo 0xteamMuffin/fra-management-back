@@ -13,7 +13,6 @@ const evidenceSchema = z.object({
 
 export const createFRAClaimSchema = z.object({
   body: z.object({
-    // Section 1
     claimantName: z.string().min(1, "Claimant name is required"),
     spouseName: z.string().optional(),
     fatherOrMotherName: z.string().optional(),
@@ -26,22 +25,18 @@ export const createFRAClaimSchema = z.object({
     casteOrTribeCertificateS3Key: z.string().optional(),
     familyMembers: z.array(familyMemberSchema).optional(),
 
-    // Section 2
-    claimedRights: z.any(), // For flexibility, can be refined later
+    claimedRights: z.any(),
 
-    // Section 3
-    evidence: z.array(evidenceSchema).min(2, "At least two forms of evidence are required"),
+    evidence: z
+      .array(evidenceSchema)
+      .min(2, "At least two forms of evidence are required"),
 
-    // Section 4
     otherRelevantInfo: z.string().optional(),
     applicantSignatureOrThumbS3Key: z.string().optional(),
 
-    // Core Info
     villageId: z.string().uuid("Invalid village UUID"),
     type: z.enum(["IFR", "CR", "CFR"]),
   }),
 });
 
-export const updateFRAClaimSchema = z.object({
-  // ... similar structure, but all fields optional
-});
+export const updateFRAClaimSchema = z.object({});

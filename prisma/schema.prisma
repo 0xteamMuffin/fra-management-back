@@ -94,7 +94,7 @@ model Village {
 
 model FRAClaim {
   id                  String    @id @default(uuid())
-  type                FRAType // Retained for high-level classification
+  type                FRAType 
   claimantName        String
   spouseName          String?
   fatherOrMotherName  String?
@@ -103,28 +103,28 @@ model FRAClaim {
   gramPanchayat       String?
   tehsil              String?
   district            String?
-  claimantCategory    String // "ST" or "OTFD"
+  claimantCategory    String 
   casteOrTribeCertificateS3Key String?
 
-  // Section 2: Details of the Forest Right Claimed (as JSON for flexibility)
+  
   claimedRights       Json?
 
-  // Section 4: Additional Information
+  
   otherRelevantInfo   String?
   applicantSignatureOrThumbS3Key String?
   remarks             String?
 
-  // --- Core Claim Details ---
+  
   status              ClaimStatus @default(Pending)
   currentStage        UserRole    @default(GramSabha)
   village             Village   @relation(fields: [villageId], references: [id])
   villageId           String
 
-  // Relationships
+  
   familyMembers       FamilyMember[]
   evidence            Evidence[]
 
-  // --- Verification & Approval ---
+  
   verifiedByUser      AppUser?    @relation("VerifiedClaims", fields: [verifiedByUserId], references: [id])
   verifiedByUserId    String?
   approvedByUser      AppUser?    @relation("ApprovedClaims", fields: [approvedByUserId], references: [id])
@@ -135,7 +135,7 @@ model FRAClaim {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  // Link to the user who created the claim
+  
   createdByUser    AppUser? @relation("CreatedClaims", fields: [createdByUserId], references: [id])
   createdByUserId  String?
 }
@@ -152,8 +152,8 @@ model FamilyMember {
 
 model Evidence {
   id              String   @id @default(uuid())
-  s3Key           String   // Link to the file in S3
-  category        String   // e.g., "GovernmentRecords", "PhysicalEvidence"
+  s3Key           String   
+  category        String   
   fraClaim        FRAClaim @relation(fields: [fraClaimId], references: [id])
   fraClaimId      String
   createdAt       DateTime @default(now())
@@ -162,8 +162,8 @@ model Evidence {
 model DocumentProcessing {
   id              String   @id @default(uuid())
   s3Key           String
-  status          String   // "PENDING", "OCR_COMPLETE", "NER_COMPLETE", "FAILED"
-  ocrEngineUsed   String?  // "Tesseract" or "GoogleVision"
+  status          String   
+  ocrEngineUsed   String?  
   extractedText   String?  @db.Text
   structuredData  Json?
   errorMessage    String?

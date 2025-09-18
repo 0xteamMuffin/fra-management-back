@@ -11,37 +11,32 @@ import {
   createVillageSchema,
   updateVillageSchema,
 } from "../schemas/village.schema";
-import {
-  authenticateJWT,
-  authorizeRoles,
-} from "../middleware/auth.middleware";
+import { authenticateJWT, authorizeRoles } from "../middleware/auth.middleware";
 
 const router = Router();
 
-// public routes
 router.get("/", getVillages);
 router.get("/:id", getVillageById);
 
-// protected routes
 router.post(
   "/",
   authenticateJWT,
   authorizeRoles(["GramSabha", "SubDivisionalCommittee", "DistrictCommittee"]),
   validate(createVillageSchema),
-  createVillage
+  createVillage,
 );
 router.put(
   "/:id",
   authenticateJWT,
   authorizeRoles(["GramSabha", "SubDivisionalCommittee", "DistrictCommittee"]),
   validate(updateVillageSchema),
-  updateVillage
+  updateVillage,
 );
 router.delete(
   "/:id",
   authenticateJWT,
   authorizeRoles(["DistrictCommittee"]),
-  deleteVillage
+  deleteVillage,
 );
 
 export { router as villageRoutes };

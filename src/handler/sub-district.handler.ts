@@ -24,7 +24,9 @@ export const getSubDistricts = async (req: Request, res: Response) => {
     const subDistricts = await db.subDistrict.findMany();
     return res.status(200).json(subDistricts);
   } catch (error) {
-    return res.status(500).json({ message: "Failed to retrieve sub-districts" });
+    return res
+      .status(500)
+      .json({ message: "Failed to retrieve sub-districts" });
   }
 };
 

@@ -45,21 +45,28 @@ export const forwardClaim = async (req: AuthRequest, res: Response) => {
     let nextStatus = claim.status;
     let nextStage = claim.currentStage;
 
-    if (claim.currentStage === 'GramSabha' && user.role === 'GramSabha') {
-      nextStatus = 'Verified';
-      nextStage = 'SubDivisionalCommittee';
-    } else if (claim.currentStage === 'SubDivisionalCommittee' && user.role === 'SubDivisionalCommittee') {
-      nextStage = 'DistrictCommittee';
+    if (claim.currentStage === "GramSabha" && user.role === "GramSabha") {
+      nextStatus = "Verified";
+      nextStage = "SubDivisionalCommittee";
+    } else if (
+      claim.currentStage === "SubDivisionalCommittee" &&
+      user.role === "SubDivisionalCommittee"
+    ) {
+      nextStage = "DistrictCommittee";
     } else {
-      return res.status(400).json({ message: "Claim is not in a forwardable state for your role" });
+      return res
+        .status(400)
+        .json({ message: "Claim is not in a forwardable state for your role" });
     }
 
     const updatedClaim = await db.fRAClaim.update({
       where: { id },
-      data: { 
+      data: {
         status: nextStatus,
         currentStage: nextStage,
-        remarks: remarks ? `${claim.remarks || ''}\n[${new Date().toISOString()}] [${user.role}]: ${remarks}` : claim.remarks
+        remarks: remarks
+          ? `${claim.remarks || ""}\n[${new Date().toISOString()}] [${user.role}]: ${remarks}`
+          : claim.remarks,
       },
     });
 
@@ -81,27 +88,41 @@ export const getDashboardStats = async (req: AuthRequest, res: Response) => {
     let stats = {};
 
     switch (user.role) {
-      case 'GramSabha':
-        const pending = await db.fRAClaim.count({ where: { currentStage: 'GramSabha' } });
-        const forwardedToSdlc = await db.fRAClaim.count({ where: { currentStage: 'SubDivisionalCommittee' } });
+      case "GramSabha":
+        const pending = await db.fRAClaim.count({
+          where: { currentStage: "GramSabha" },
+        });
+        const forwardedToSdlc = await db.fRAClaim.count({
+          where: { currentStage: "SubDivisionalCommittee" },
+        });
         stats = { pending, forwardedToSdlc };
         break;
-      
-      case 'SubDivisionalCommittee':
-        const toReviewSdlc = await db.fRAClaim.count({ where: { currentStage: 'SubDivisionalCommittee' } });
-        const forwardedToDlc = await db.fRAClaim.count({ where: { currentStage: 'DistrictCommittee' } });
+
+      case "SubDivisionalCommittee":
+        const toReviewSdlc = await db.fRAClaim.count({
+          where: { currentStage: "SubDivisionalCommittee" },
+        });
+        const forwardedToDlc = await db.fRAClaim.count({
+          where: { currentStage: "DistrictCommittee" },
+        });
         stats = { toReviewSdlc, forwardedToDlc };
         break;
 
-      case 'DistrictCommittee':
-        const toReviewDlc = await db.fRAClaim.count({ where: { currentStage: 'DistrictCommittee', status: 'Verified' } });
-        const granted = await db.fRAClaim.count({ where: { status: 'Granted' } });
-        const rejected = await db.fRAClaim.count({ where: { status: 'Rejected' } });
+      case "DistrictCommittee":
+        const toReviewDlc = await db.fRAClaim.count({
+          where: { currentStage: "DistrictCommittee", status: "Verified" },
+        });
+        const granted = await db.fRAClaim.count({
+          where: { status: "Granted" },
+        });
+        const rejected = await db.fRAClaim.count({
+          where: { status: "Rejected" },
+        });
         stats = { toReviewDlc, granted, rejected };
         break;
-        
+
       default:
-        return res.status(200).json({}); // No stats for other roles
+        return res.status(200).json({});
     }
 
     return res.status(200).json(stats);
@@ -122,15 +143,17 @@ export const rejectClaim = async (req: AuthRequest, res: Response) => {
     }
 
     if (!reason) {
-      return res.status(400).json({ message: "A reason for rejection is required" });
+      return res
+        .status(400)
+        .json({ message: "A reason for rejection is required" });
     }
 
     const updatedClaim = await db.fRAClaim.update({
       where: { id },
       data: {
         status: "Rejected",
-        approvedByUserId: userId, // The person rejecting is the final authority in this case
-        otherRelevantInfo: reason, // Store the rejection reason
+        approvedByUserId: userId,
+        otherRelevantInfo: reason,
       },
     });
 

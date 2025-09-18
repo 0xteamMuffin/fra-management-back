@@ -10,7 +10,6 @@ export const signup = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // a citizen can signup only
     if (role !== "VillagePerson") {
       return res.status(400).json({ message: "Invalid role" });
     }
@@ -54,11 +53,11 @@ export const login = async (req: Request, res: Response) => {
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
-    return res.json({ 
-      success: true, 
+    return res.json({
+      success: true,
       token,
       user: {
         id: user.id,
@@ -67,14 +66,13 @@ export const login = async (req: Request, res: Response) => {
         role: user.role,
         phone: user.phone,
         villageId: user.villageId,
-      }
+      },
     });
   } catch (err) {
     return res.status(500).json({ message: "Login failed" });
   }
 };
 
-// Get current user info (for token validation)
 export const getMe = async (req: AuthRequest, res: Response) => {
   try {
     const user = await db.appUser.findUnique({

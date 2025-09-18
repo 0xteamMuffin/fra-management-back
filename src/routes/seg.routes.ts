@@ -20,10 +20,9 @@ router.post(
       form.append(
         "file",
         new Blob([new Uint8Array(req.file.buffer)]),
-        req.file.originalname
+        req.file.originalname,
       );
 
-      // Call FastAPI endpoint
       const response = await fetch(`${LAND_SEGMENTATION_API_URL}/segment`, {
         method: "POST",
         body: form,
@@ -35,18 +34,17 @@ router.post(
           .json({ error: await response.text() });
       }
 
-      // This assumes FastAPI returns JSON { stats, segmented_image (base64) }
       const json = await response.json();
 
       res.json({
         stats: json.stats,
-        segmentedImage: json.segmented_image, // frontend can render directly as <img src={base64} />
+        segmentedImage: json.segmented_image,
       });
     } catch (err: any) {
       console.error("Segmentation API error:", err);
       return res.status(500).json({ error: "Segmentation failed" });
     }
-  }
+  },
 );
 
 export { router as segmentationRoutes };

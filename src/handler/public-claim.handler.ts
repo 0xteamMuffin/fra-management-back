@@ -39,7 +39,6 @@ export const trackClaimStatus = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Claim not found" });
     }
 
-    // Return a simplified object for public view
     const publicClaimDetails = {
       id: claim.id,
       status: claim.status,

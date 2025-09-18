@@ -7,7 +7,7 @@ if (
   !process.env.S3_BUCKET_NAME
 ) {
   throw new Error(
-    "Missing required AWS S3 environment variables. Please check your .env file."
+    "Missing required AWS S3 environment variables. Please check your .env file.",
   );
 }
 

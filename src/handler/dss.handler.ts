@@ -14,8 +14,6 @@ export const getDSSSuggestions = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "assetMapping is required" });
     }
 
-    // You can also add more specific validation for assetMapping properties here if needed
-
     const prompt = `
 You are an expert Decision Support System (DSS) advisor for rural development 
 and welfare scheme alignment. 
@@ -81,8 +79,7 @@ Your tasks:
 
     try {
       let jsonString = aiResponse;
-      
-      // We'll extract the JSON string if it's wrapped.
+
       const match = jsonString.match(/```json\n([\s\S]*?)\n```/);
       if (match && match[1]) {
         jsonString = match[1];
@@ -100,7 +97,9 @@ Your tasks:
   } catch (error) {
     console.error("Error in getDSSSuggestions:", error);
     if (error instanceof OpenAI.APIError) {
-      return res.status(error.status || 500).json({ message: `OpenAI Error: ${error.message}` });
+      return res
+        .status(error.status || 500)
+        .json({ message: `OpenAI Error: ${error.message}` });
     }
     return res.status(500).json({ message: "Failed to fetch suggestions" });
   }

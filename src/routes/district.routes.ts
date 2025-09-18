@@ -11,37 +11,32 @@ import {
   createDistrictSchema,
   updateDistrictSchema,
 } from "../schemas/district.schema";
-import {
-  authenticateJWT,
-  authorizeRoles,
-} from "../middleware/auth.middleware";
+import { authenticateJWT, authorizeRoles } from "../middleware/auth.middleware";
 
 const router = Router();
 
-// public routes
 router.get("/", getDistricts);
 router.get("/:id", getDistrictById);
 
-// protected routes
 router.post(
   "/",
   authenticateJWT,
   authorizeRoles(["SubDivisionalCommittee", "DistrictCommittee"]),
   validate(createDistrictSchema),
-  createDistrict
+  createDistrict,
 );
 router.put(
   "/:id",
   authenticateJWT,
   authorizeRoles(["SubDivisionalCommittee", "DistrictCommittee"]),
   validate(updateDistrictSchema),
-  updateDistrict
+  updateDistrict,
 );
 router.delete(
   "/:id",
   authenticateJWT,
   authorizeRoles(["DistrictCommittee"]),
-  deleteDistrict
+  deleteDistrict,
 );
 
 export { router as districtRoutes };
