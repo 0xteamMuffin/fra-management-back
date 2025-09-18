@@ -80,8 +80,16 @@ Your tasks:
     }
 
     try {
-      const suggestions = JSON.parse(aiResponse);
-      return res.status(200).json({ suggestions });
+      let jsonString = aiResponse;
+      
+      // We'll extract the JSON string if it's wrapped.
+      const match = jsonString.match(/```json\n([\s\S]*?)\n```/);
+      if (match && match[1]) {
+        jsonString = match[1];
+      }
+
+      const suggestions = JSON.parse(jsonString);
+      return res.status(200).json(suggestions);
     } catch (error) {
       console.error("Error parsing AI response to JSON:", error);
       console.error("Raw AI Response:", aiResponse);
