@@ -5,6 +5,7 @@ torch
 torchvision
 rasterio
 geopandas
+<<<<<<< HEAD
 
 fastapi
 uvicorn[standard]
@@ -12,4 +13,6 @@ pydantic
 spacy
 opencv-python-headless
 python-dotenv
+=======
+>>>>>>> 6a7ac026bce6f558c2ea47b56525b4198d495359
 python-multipart

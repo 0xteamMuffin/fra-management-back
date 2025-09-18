@@ -5,6 +5,7 @@ import {
   getFRAClaimById,
   getFRAClaims,
   updateFRAClaim,
+  trackClaimStatus,
 } from "../handler/fra-claim.handler";
 import { validate } from "../middleware/validate.middleware";
 import {
@@ -17,6 +18,9 @@ import {
 } from "../middleware/auth.middleware";
 
 const router = Router();
+
+// public tracking route
+router.get("/track/:claimId", trackClaimStatus);
 
 // all users can view claims
 router.get("/", authenticateJWT, getFRAClaims);

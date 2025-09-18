@@ -9,11 +9,10 @@ from io import BytesIO
 import spacy
 from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
-from dotenv import load_dotenv
-from googletrans import Translator
+from dotenv import load_dotenv, find_dotenv
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(find_dotenv())
 
 # --- Configuration & Initialization ---
 logging.basicConfig(level=logging.INFO)

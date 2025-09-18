@@ -54,15 +54,26 @@ model State {
 }
 
 model District {
-  id        String    @id @default(uuid())
-  name      String
-  code      String?
-  state     State     @relation(fields: [stateId], references: [id])
-  stateId   String
-  boundary  Unsupported("geometry")
-  villages  Village[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String        @id @default(uuid())
+  name        String
+  code        String?
+  state       State         @relation(fields: [stateId], references: [id])
+  stateId     String
+  boundary    Unsupported("geometry")?
+  subDistricts SubDistrict[]
+  villages    Village[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model SubDistrict {
+  id         String    @id @default(uuid())
+  name       String
+  district   District  @relation(fields: [districtId], references: [id])
+  districtId String
+  villages   Village[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 }
 
 model Village {
@@ -70,6 +81,8 @@ model Village {
   name        String
   district    District   @relation(fields: [districtId], references: [id])
   districtId  String
+  subDistrict SubDistrict? @relation(fields: [subDistrictId], references: [id])
+  subDistrictId String?
   coordinates Unsupported("geometry")
   boundary    Unsupported("geometry")?
   fraClaims   FRAClaim[]
@@ -119,6 +132,10 @@ model FRAClaim {
   legacyDocs          LegacyDocument[]
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+
+  // Link to the user who created the claim
+  createdByUser    AppUser? @relation("CreatedClaims", fields: [createdByUserId], references: [id])
+  createdByUserId  String?
 }
 
 model FamilyMember {
@@ -208,6 +225,7 @@ model AppUser {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   AuditLog       AuditLog[]
+  createdClaims  FRAClaim[] @relation("CreatedClaims")
 }
 
 model Permission {
