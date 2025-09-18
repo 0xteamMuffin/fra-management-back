@@ -5,3 +5,11 @@ torch
 torchvision
 rasterio
 geopandas
+
+fastapi
+uvicorn[standard]
+pydantic
+spacy
+opencv-python-headless
+python-dotenv
+python-multipart

@@ -4,6 +4,6 @@ import { getDSSSuggestions } from "../handler/dss.handler";
 
 const router = Router();
 
-router.post("/dss", authenticateJWT, getDSSSuggestions);
+router.post("/dss", getDSSSuggestions);
 
 export { router as dssRoutes };

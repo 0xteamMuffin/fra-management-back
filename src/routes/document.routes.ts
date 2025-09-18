@@ -3,7 +3,6 @@ import {
   processDocument,
   documentProcessingCallback,
   getDocumentProcessingStatus,
-  test,
 } from "../handler/document.handler";
 import {
   processDocumentSchema,
@@ -13,11 +12,6 @@ import { validate } from "../middleware/validate.middleware";
 import { authenticateJWT } from "../middleware/auth.middleware";
 
 const router = Router();
-
-router.get(
-  "/test",
-  test
-)
 
 // Endpoint to start the processing job
 router.post(
