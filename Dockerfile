@@ -26,4 +26,6 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
+RUN npx prisma generate
+
 CMD ["npm", "run", "dev"]
