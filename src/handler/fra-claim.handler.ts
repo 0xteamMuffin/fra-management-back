@@ -70,6 +70,7 @@ export const getFRAClaims = async (req: AuthRequest, res: Response) => {
          break;
        case 'DistrictCommittee':
          whereClause.currentStage = 'DistrictCommittee';
+         whereClause.status = 'Verified';
          break;
        default:
          return res.status(403).json({ message: "Forbidden: User role cannot view claims" });
