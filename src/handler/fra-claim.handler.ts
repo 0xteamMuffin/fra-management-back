@@ -8,14 +8,16 @@ export const createFRAClaim = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized: No user ID found" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No user ID found" });
     }
 
     const result = await db.$transaction(async (prisma) => {
       const newClaim = await prisma.fRAClaim.create({
         data: {
           ...claimData,
-          createdByUserId: userId, // Associate the claim with the user
+          createdByUserId: userId,
         },
       });
 
@@ -57,24 +59,25 @@ export const getFRAClaims = async (req: AuthRequest, res: Response) => {
 
     let whereClause: any = {};
 
-     // Tailor the query based on user role
-     switch (user.role) {
-       case 'VillagePerson':
-         whereClause.createdByUserId = user.id;
-         break;
-       case 'GramSabha':
-         whereClause.currentStage = 'GramSabha';
-         break;
-       case 'SubDivisionalCommittee':
-         whereClause.currentStage = 'SubDivisionalCommittee';
-         break;
-       case 'DistrictCommittee':
-         whereClause.currentStage = 'DistrictCommittee';
-         whereClause.status = 'Verified';
-         break;
-       default:
-         return res.status(403).json({ message: "Forbidden: User role cannot view claims" });
-     }
+    switch (user.role) {
+      case "VillagePerson":
+        whereClause.createdByUserId = user.id;
+        break;
+      case "GramSabha":
+        whereClause.currentStage = "GramSabha";
+        break;
+      case "SubDivisionalCommittee":
+        whereClause.currentStage = "SubDivisionalCommittee";
+        break;
+      case "DistrictCommittee":
+        whereClause.currentStage = "DistrictCommittee";
+        whereClause.status = "Verified";
+        break;
+      default:
+        return res
+          .status(403)
+          .json({ message: "Forbidden: User role cannot view claims" });
+    }
 
     const claims = await db.fRAClaim.findMany({
       where: whereClause,
@@ -84,8 +87,8 @@ export const getFRAClaims = async (req: AuthRequest, res: Response) => {
         evidence: true,
       },
       orderBy: {
-        createdAt: 'desc',
-      }
+        createdAt: "desc",
+      },
     });
     return res.status(200).json(claims);
   } catch (error) {
@@ -110,8 +113,14 @@ export const getFRAClaimById = async (req: Request, res: Response) => {
 export const updateFRAClaim = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { type, claimantName, claimantAadhaar, villageId, geoBoundary, status } =
-      req.body;
+    const {
+      type,
+      claimantName,
+      claimantAadhaar,
+      villageId,
+      geoBoundary,
+      status,
+    } = req.body;
 
     const claim = await db.$queryRaw`
       UPDATE "FRAClaim"
@@ -182,7 +191,6 @@ export const trackClaimStatus = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Claim not found" });
     }
 
-    // Return a simplified object for public view
     const publicClaimDetails = {
       id: claim.id,
       status: claim.status,

@@ -13,26 +13,23 @@ import { authenticateJWT } from "../middleware/auth.middleware";
 
 const router = Router();
 
-// Endpoint to start the processing job
 router.post(
   "/process",
   authenticateJWT,
   validate(processDocumentSchema),
-  processDocument
+  processDocument,
 );
 
-// Endpoint for the Python service to call back to
 router.post(
   "/callback/:processingId",
   validate(callbackSchema),
-  documentProcessingCallback
+  documentProcessingCallback,
 );
 
-// Endpoint for the frontend to poll for status
 router.get(
   "/status/:processingId",
   authenticateJWT,
-  getDocumentProcessingStatus
+  getDocumentProcessingStatus,
 );
 
 export { router as documentRoutes };

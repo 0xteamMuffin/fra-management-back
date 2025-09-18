@@ -12,21 +12,15 @@ import {
   createFRAClaimSchema,
   updateFRAClaimSchema,
 } from "../schemas/fra-claim.schema";
-import {
-  authenticateJWT,
-  authorizeRoles,
-} from "../middleware/auth.middleware";
+import { authenticateJWT, authorizeRoles } from "../middleware/auth.middleware";
 
 const router = Router();
 
-// public tracking route
 router.get("/track/:claimId", trackClaimStatus);
 
-// all users can view claims
 router.get("/", authenticateJWT, getFRAClaims);
 router.get("/:id", authenticateJWT, getFRAClaimById);
 
-// a village person can create a claim
 router.post(
   "/",
   authenticateJWT,
@@ -37,22 +31,21 @@ router.post(
     "DistrictCommittee",
   ]),
   validate(createFRAClaimSchema),
-  createFRAClaim
+  createFRAClaim,
 );
 
-// only higher-level users can update or delete
 router.put(
   "/:id",
   authenticateJWT,
   authorizeRoles(["GramSabha", "SubDivisionalCommittee", "DistrictCommittee"]),
   validate(updateFRAClaimSchema),
-  updateFRAClaim
+  updateFRAClaim,
 );
 router.delete(
   "/:id",
   authenticateJWT,
   authorizeRoles(["DistrictCommittee"]),
-  deleteFRAClaim
+  deleteFRAClaim,
 );
 
 export { router as fraClaimRoutes };

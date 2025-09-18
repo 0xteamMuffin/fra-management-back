@@ -23,7 +23,7 @@ export const getPresignedUrl = async (req: Request, res: Response) => {
     });
 
     const uploadUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: 60 * 5, // 5 minutes
+      expiresIn: 60 * 5,
     });
 
     return res.status(200).json({
@@ -50,7 +50,7 @@ export const getPresignedViewUrl = async (req: Request, res: Response) => {
     });
 
     const viewUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: 60 * 5, // 5 minutes
+      expiresIn: 60 * 5,
     });
 
     return res.status(200).json({ viewUrl });

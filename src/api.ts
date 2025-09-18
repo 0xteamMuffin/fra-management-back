@@ -15,10 +15,8 @@ import { dssRoutes } from "./routes/dss.routes";
 
 const router = Router();
 
-// Public setup routes (no auth required)
 router.use("/setup", setupRoutes);
 
-// v1 API routes
 router.use(
   "/v1",
   Router()
@@ -33,7 +31,7 @@ router.use(
     .use("/analysis", segmentationRoutes)
     .use("/documents", documentRoutes)
     .use("/admin", adminRoutes)
-    .use("/dss", dssRoutes)
+    .use("/dss", dssRoutes),
 );
 
 export { router as apiRouter };

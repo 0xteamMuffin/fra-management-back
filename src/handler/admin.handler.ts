@@ -2,27 +2,19 @@ import { Request, Response } from "express";
 import db from "../db/db";
 import { AuthRequest } from "../middleware/auth.middleware";
 
-// Get admin dashboard statistics
 export const getAdminStats = async (req: AuthRequest, res: Response) => {
   try {
     console.log("Fetching admin stats...");
-    
-    // Get counts for all major entities
-    const [
-      states,
-      districts, 
-      villages,
-      users,
-      claims,
-      schemes
-    ] = await Promise.all([
-      db.state.count(),
-      db.district.count(),
-      db.village.count(),
-      db.appUser.count(),
-      db.fRAClaim.count(),
-      db.scheme.count(),
-    ]);
+
+    const [states, districts, villages, users, claims, schemes] =
+      await Promise.all([
+        db.state.count(),
+        db.district.count(),
+        db.village.count(),
+        db.appUser.count(),
+        db.fRAClaim.count(),
+        db.scheme.count(),
+      ]);
 
     const stats = {
       states,
@@ -41,7 +33,6 @@ export const getAdminStats = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Bulk create states
 export const bulkCreateStates = async (req: AuthRequest, res: Response) => {
   try {
     const { states } = req.body;
@@ -50,13 +41,11 @@ export const bulkCreateStates = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Invalid states data" });
     }
 
-    // Use createMany for bulk insert
     const result = await db.state.createMany({
       data: states,
-      skipDuplicates: true, // Skip if state code already exists
+      skipDuplicates: true,
     });
 
-    // Get the created states to return
     const createdStates = await db.state.findMany({
       where: {
         code: {
@@ -72,7 +61,6 @@ export const bulkCreateStates = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Bulk create districts
 export const bulkCreateDistricts = async (req: AuthRequest, res: Response) => {
   try {
     const { districts } = req.body;
@@ -81,7 +69,6 @@ export const bulkCreateDistricts = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Invalid districts data" });
     }
 
-    // Create districts one by one because of geometry fields
     const createdDistricts = [];
 
     for (const district of districts) {
@@ -91,12 +78,15 @@ export const bulkCreateDistricts = async (req: AuthRequest, res: Response) => {
           VALUES (gen_random_uuid(), ${district.name}, ${district.code}, ${district.stateId}, ST_GeomFromGeoJSON(${district.boundary}), NOW(), NOW())
           RETURNING *;
         `;
-        
+
         if (Array.isArray(created) && created.length > 0) {
           createdDistricts.push(created[0]);
         }
       } catch (districtError) {
-        console.error(`Failed to create district ${district.name}:`, districtError);
+        console.error(
+          `Failed to create district ${district.name}:`,
+          districtError,
+        );
       }
     }
 
@@ -107,7 +97,6 @@ export const bulkCreateDistricts = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Bulk create villages
 export const bulkCreateVillages = async (req: AuthRequest, res: Response) => {
   try {
     const { villages } = req.body;
@@ -116,7 +105,6 @@ export const bulkCreateVillages = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Invalid villages data" });
     }
 
-    // Create villages one by one because of geometry fields
     const createdVillages = [];
 
     for (const village of villages) {
@@ -134,12 +122,15 @@ export const bulkCreateVillages = async (req: AuthRequest, res: Response) => {
           )
           RETURNING *;
         `;
-        
+
         if (Array.isArray(created) && created.length > 0) {
           createdVillages.push(created[0]);
         }
       } catch (villageError) {
-        console.error(`Failed to create village ${village.name}:`, villageError);
+        console.error(
+          `Failed to create village ${village.name}:`,
+          villageError,
+        );
       }
     }
 
@@ -150,7 +141,6 @@ export const bulkCreateVillages = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Get all users (admin only)
 export const getAllUsers = async (req: AuthRequest, res: Response) => {
   try {
     const users = await db.appUser.findMany({
@@ -163,10 +153,9 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
         villageId: true,
         createdAt: true,
         updatedAt: true,
-        // Exclude password hash
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
@@ -177,22 +166,21 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Create user (admin only)
 export const createUserAdmin = async (req: AuthRequest, res: Response) => {
   try {
     const { name, email, password, role, phone, villageId } = req.body;
 
-    // Check if user already exists
     const existingUser = await db.appUser.findUnique({
       where: { email },
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "User with this email already exists" });
+      return res
+        .status(400)
+        .json({ message: "User with this email already exists" });
     }
 
-    // Hash the password (using bcrypt as in auth handler)
-    const bcrypt = require('bcrypt');
+    const bcrypt = require("bcrypt");
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await db.appUser.create({
@@ -223,14 +211,14 @@ export const createUserAdmin = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Delete user (admin only)
 export const deleteUser = async (req: AuthRequest, res: Response) => {
   try {
     const { userId } = req.params;
 
-    // Don't allow deleting the current admin user
     if (userId === req.user?.id) {
-      return res.status(400).json({ message: "Cannot delete your own account" });
+      return res
+        .status(400)
+        .json({ message: "Cannot delete your own account" });
     }
 
     await db.appUser.delete({
@@ -244,14 +232,13 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Quick seed data for demo
 export const seedDemoData = async (req: AuthRequest, res: Response) => {
   try {
-    const { includeStates, includeDistricts, includeVillages, includeUsers } = req.body;
+    const { includeStates, includeDistricts, includeVillages, includeUsers } =
+      req.body;
 
     const results: any = {};
 
-    // Seed Indian states
     if (includeStates) {
       const indianStates = [
         { name: "Odisha", code: "OR" },
@@ -260,7 +247,6 @@ export const seedDemoData = async (req: AuthRequest, res: Response) => {
         { name: "Chhattisgarh", code: "CG" },
         { name: "Andhra Pradesh", code: "AP" },
         { name: "Telangana", code: "TG" },
-        // Add more as needed
       ];
 
       const statesResult = await db.state.createMany({
@@ -271,7 +257,6 @@ export const seedDemoData = async (req: AuthRequest, res: Response) => {
       results.states = statesResult.count;
     }
 
-    // Add sample districts for Odisha
     if (includeDistricts) {
       const odishaState = await db.state.findUnique({
         where: { code: "OR" },
@@ -279,17 +264,17 @@ export const seedDemoData = async (req: AuthRequest, res: Response) => {
 
       if (odishaState) {
         const sampleDistricts = [
-          { 
-            name: "Mayurbhanj", 
-            code: "MAY", 
+          {
+            name: "Mayurbhanj",
+            code: "MAY",
             stateId: odishaState.id,
-            boundary: JSON.stringify({ type: "Polygon", coordinates: [[]] })
+            boundary: JSON.stringify({ type: "Polygon", coordinates: [[]] }),
           },
-          { 
-            name: "Balasore", 
-            code: "BLS", 
+          {
+            name: "Balasore",
+            code: "BLS",
             stateId: odishaState.id,
-            boundary: JSON.stringify({ type: "Polygon", coordinates: [[]] })
+            boundary: JSON.stringify({ type: "Polygon", coordinates: [[]] }),
           },
         ];
 
@@ -311,7 +296,6 @@ export const seedDemoData = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // Add sample villages
     if (includeVillages) {
       const mayurbhanjDistrict = await db.district.findFirst({
         where: { name: "Mayurbhanj" },
@@ -319,15 +303,21 @@ export const seedDemoData = async (req: AuthRequest, res: Response) => {
 
       if (mayurbhanjDistrict) {
         const sampleVillages = [
-          { 
-            name: "Lembujharan", 
+          {
+            name: "Lembujharan",
             districtId: mayurbhanjDistrict.id,
-            coordinates: JSON.stringify({ type: "Point", coordinates: [85.8245, 21.9162] })
+            coordinates: JSON.stringify({
+              type: "Point",
+              coordinates: [85.8245, 21.9162],
+            }),
           },
-          { 
-            name: "Baripada", 
+          {
+            name: "Baripada",
             districtId: mayurbhanjDistrict.id,
-            coordinates: JSON.stringify({ type: "Point", coordinates: [86.7346, 21.9347] })
+            coordinates: JSON.stringify({
+              type: "Point",
+              coordinates: [86.7346, 21.9347],
+            }),
           },
         ];
 
@@ -359,13 +349,12 @@ export const seedDemoData = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// Export data
 export const exportData = async (req: AuthRequest, res: Response) => {
   try {
     const [states, districts, villages, users, claims] = await Promise.all([
       db.state.findMany(),
       db.district.findMany(),
-      db.village.findMany(), 
+      db.village.findMany(),
       db.appUser.findMany({
         select: {
           id: true,
@@ -391,9 +380,12 @@ export const exportData = async (req: AuthRequest, res: Response) => {
       },
     };
 
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="fra_data_export_${Date.now()}.json"`);
-    
+    res.setHeader("Content-Type", "application/json");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="fra_data_export_${Date.now()}.json"`,
+    );
+
     return res.status(200).json(exportData);
   } catch (error) {
     console.error("Error exporting data:", error);

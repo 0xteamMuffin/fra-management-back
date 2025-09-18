@@ -14,7 +14,7 @@ export interface AuthRequest extends Request {
 export const authenticateJWT = (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const authHeader = req.headers["authorization"];
   if (!authHeader) return res.status(401).json({ message: "Missing token" });
@@ -29,7 +29,6 @@ export const authenticateJWT = (
   }
 };
 
-// role-based authorization middleware
 export const authorizeRoles = (roles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
