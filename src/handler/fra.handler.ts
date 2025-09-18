@@ -26,6 +26,36 @@ export const verifyClaim = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const rejectClaim = async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    if (!reason) {
+      return res.status(400).json({ message: "A reason for rejection is required" });
+    }
+
+    const updatedClaim = await db.fRAClaim.update({
+      where: { id },
+      data: {
+        status: "Rejected",
+        approvedByUserId: userId, // The person rejecting is the final authority in this case
+        otherRelevantInfo: reason, // Store the rejection reason
+      },
+    });
+
+    return res.status(200).json(updatedClaim);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to reject claim" });
+  }
+};
+
 export const approveClaim = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
