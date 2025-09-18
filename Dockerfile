@@ -1,11 +1,18 @@
 
-FROM node:20
+FROM node:18
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+
+RUN npm install -g ts-node
+RUN npm install
 
 COPY . .
 
-CMD ["npm", "run", "dev"]
+RUN npx prisma generate
+
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+CMD ["./entrypoint.sh"]
